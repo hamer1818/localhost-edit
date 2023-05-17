@@ -1,80 +1,107 @@
-<!-- form içinden gelen veri ile yönlendirme işlemi yapıyoruz -->
-
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHP KLASÖR BULMA SİSTEMİ V0.1</title>
+    <title>PHP div finder</title>
     <style>
-        body{
-            background-color: #000;
-            color: #fff;
+        .folder-button-container {
+            display: flex;
+            flex-wrap: wrap;
         }
-        .form{
-            /* ortala */
-            margin: 0 auto;
-            /* genişlik */
-            width: 350px;
-            /* yükseklik */
-            height: 300px;
-            /* arka plan */
-            background-color: #000;
-            /* kenarlık */
-            border: 1px solid #fff;
-            /* kenarlık yuvarlağı */
-            border-radius: 5px;
-            /* içerik */
-            padding: 20px;
-            /* içerik yuvarlağı */
-            border-radius: 5px;
-            margin-top: 100px;
+
+        .folder-button {
+            width: 195px;
+            height: 195px;
+            margin: 5px;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .folder-button:hover {
+            background-color: #ddd;
+        }
+        .search-bar {
+            margin: 20px;
+            text-align: center;
 
         }
-        #input{
-            width: 90%;
+        .search-bar input {
+            width: 300px;
             height: 30px;
-            border: 1px solid #fff;
-            border-radius: 5px;
-            padding: 5px 10px;
-            margin: 10px 5px;
-            font-size: 15px;
-            margin-top: 30px;
-        }
-        #buton{
-            width: 100%;
-            height: 30px;
-            border: 1px solid #fff;
-            border-radius: 5px;
+            border-radius: 15px;
+            border: 1px solid #ddd;
             padding: 5px;
-            background-color: #fff;
-            color: #000;
-            cursor: pointer;
-            margin-top: 50px;
+            font-size: 16px;
+            text-align:center;
         }
-        #buton:hover{
-            background-color: #000;
-            color: #fff;
+        footer {
+            margin-top:150px;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        footer a {
+            color: #111;
+            text-decoration: none;
+        }
+        footer a:hover {
+            color: #333;
+        }
+
+        footer p{
+            /* her p tagini flex şeklinde kullan */
+            flex: 1;
+            text-align: center;
+        }
+
+
     </style>
-    <script>
-        <?php
-            if($DurumKodu == 0){
-                echo "alert('Lütfen klasör ismi giriniz!')";
-            }else if($DurumKodu == 1){
-                echo "alert('Klasör bulunamadı!')";
-            }else if($DurumKodu == 2){
-                echo "alert('Klasör bulundu!')";
-            }
-        ?>
-    </script>
 </head>
 <body>
-    <form action="yonlendir.php" method="post" class="form">
-        <h1>PHP KLASÖR BULMA SİSTEMİ V0.1</h1>
-        <input type="text" name="klasorIsmi" placeholder="klasor ismi giriniz" id="input" title="htdocs içindeki klasör ismi yazın">
-        <input type="submit" value="Gönder" id="buton">
-    </form>
+<div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Arama yapın">
+    </div>
+    <div class="folder-button-container">
+        <?php
+        $klasorler = array_filter(glob('*', GLOB_ONLYDIR), 'is_dir');
+        foreach ($klasorler as $klasor) {
+            echo "<button class='folder-button' onclick=\"location.href='./$klasor'\">$klasor</button>";
+        }
+        ?>
+    </div>
+
+
+    <script>
+        var searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("input", function() {
+            var filter = searchInput.value.toUpperCase();
+            var folders = document.getElementsByClassName("folder-button");
+
+            for (var i = 0; i < folders.length; i++) {
+                var folder = folders[i];
+                var folderName = folder.innerHTML.toUpperCase();
+                if (folderName.indexOf(filter) > -1) {
+                    folder.style.display = "";
+                } else {
+                    folder.style.display = "none";
+                }
+            }
+        });
+    </script>
+
+    <footer>
+        <p>php klasör bulucu v2.0 / php directory finder v2.0</p>
+        <p>Yapımcı: <a href="https://github.com/hamer1818">Hamza ORTATEPE</a></p>
+    </footer>
 </body>
 </html>
