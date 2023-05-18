@@ -6,6 +6,7 @@
         .folder-button-container {
             display: flex;
             flex-wrap: wrap;
+            padding: 10px 290px 10px 290px;
         }
 
         .folder-button {
