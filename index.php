@@ -1,21 +1,22 @@
 <?php
-
-// klasorOlustur inputuna girilen değeri alıyoruz
+// Folder creation logic remains similar but update path handling
 $olusturulanKlasorAdi = @$_POST["klasorOlustur"];
-
-// eğer klasorOlustur inputu boş değilse
 
 if ($olusturulanKlasorAdi == "") {
     if (isset($_POST["klasorOlustur"]))
-    echo "<script>alert('Klasör adı boş olamaz!');</script>";
+        echo "<script>alert('Folder name cannot be empty!');</script>";
 } elseif (!is_dir($olusturulanKlasorAdi)) {
     mkdir($olusturulanKlasorAdi);
-    echo "<script>alert('$olusturulanKlasorAdi isminde klasör oluşturuldu');</script>";
-
-} else {
-    echo "<script>alert('Klasör zaten mevcut: $olusturulanKlasorAdi');</script>";
+    // Create virtual host config for Laragon
+    $vhostContent = "
+    <VirtualHost *:80>
+        ServerName {$olusturulanKlasorAdi}.test
+        DocumentRoot \"%LARAGON_ROOT%/www/{$olusturulanKlasorAdi}\"
+    </VirtualHost>";
+    // Save to Laragon's auto-created vhosts
+    file_put_contents("C:/laragon/etc/apache2/sites-enabled/{$olusturulanKlasorAdi}.test.conf", $vhostContent);
+    echo "<script>alert('Folder created: {$olusturulanKlasorAdi}.test');</script>";
 }
-
 
 if (isset($_POST["phpOlsunMu"])){
     // olusturulanKlasorAdi değişkenindeki klasörün içine index.php dosyası oluşturuyoruz
@@ -51,363 +52,122 @@ if ($yokEdilenKlasorAdi == "") {
 } else {
     echo "<script>alert('Klasör zaten mevcut değil: $yokEdilenKlasorAdi');</script>";
 }
-
-
-
 ?>
 
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>PHP localhost edit</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-
-    <style>
-        .folder-button-container {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 10px 290px 10px 290px;
-        }
-
-        .folder-button {
-            width: 195px;
-            height: 195px;
-            margin: 5px;
-            background-color: #f1f1f1;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .folder-button:hover {
-            background-color: #ddd;
-        }
-
-        .search-bar {
-            margin: 20px;
-            text-align: center;
-
-        }
-
-        .search-bar input {
-            width: 300px;
-            height: 30px;
-            border-radius: 15px;
-            border: 1px solid #ddd;
-            padding: 5px;
-            font-size: 16px;
-            text-align: center;
-        }
-
-        footer {
-            margin-top: 150px;
-            bottom: 0;
-            width: 100%;
-            height: 50px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        footer a {
-            color: #111;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: #333;
-        }
-
-        footer p {
-            /* her p tagini flex şeklinde kullan */
-            flex: 1;
-            text-align: center;
-        }
-
-        .modal {
-            display: none;
-            /* Hidden by default */
-            position: fixed;
-            /* Stay in place */
-            z-index: 1;
-            /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%;
-            /* Full width */
-            height: 100%;
-            /* Full height */
-            overflow: auto;
-            /* Enable scroll if needed */
-            background-color: rgb(0, 0, 0);
-            /* Fallback color */
-            background-color: rgba(0, 0, 0, 0.4);
-            /* Black w/ opacity */
-        }
-
-        /* Modal Content/Box */
-        .ko-modal-ıcerik {
-            background-color: #fefefe;
-            margin: 18% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 25%;
-            height: 270px;
-            padding-left: 20px; 
-        }
-        .ko-modal-ıcerik > form{
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .ko-modal-ıcerik > form > *{
-            margin: 5px ;
-        }
-        /* Modal Content/Box */
-        .ky-modal-ıcerik {
-            background-color: #fefefe;
-            margin: 18% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 25%;
-            height: 200px;
-            padding-left: 20px; 
-        }
-        .ky-modal-ıcerik > form{
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .ky-modal-ıcerik > form > *{
-            margin: 5px ;
-        }
-        
-        hr{
-            width: 100%;
-            color:rgba(0, 0, 0, 0.4);
-        }
-        .yanyana{
-            display: flex;
-            flex-direction: row;
-            justify-content: space-around;
-            align-items: center;
-        }
-        .yanyana > *{
-            margin: 5px;
-        }
-
-        /* The Close Button */
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            margin: 0 0 15px 15px;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .kyclose {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            margin: 0 0 15px 15px;
-        }
-
-        .kyclose:hover,
-        .kyclose:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        #klasorOlustur{
-            width: 100%;
-            height: 30px;
-            border-radius: 25px;
-            border: 1px solid #ddd;
-            padding: 5px;
-            font-size: 16px;
-            text-align: center;
-        }
-        #klasorYokEt{
-            width: 100%;
-            height: 30px;
-            border-radius: 25px;
-            border: 1px solid #ddd;
-            padding: 5px;
-            font-size: 16px;
-            text-align: center;
-        }
-        .klasor-btn{
-            width: 100%;
-            height: 30px;
-            border-radius: 15px;
-            border: 1px solid #ddd;
-            padding: 5px;
-            font-size: 16px;
-            text-align: center;
-            margin-top: 10px;
-
-        }
-        .klasor-btn:hover{
-            background-color: #6d706f;
-            color: white;
-        }
-        #klasorYoket{
-            border-radius: 40px;
-        }
-        #klasorYoket:hover{
-            background-color: #6d706f;
-            color: white;
-            border-radius: 50px;
+    <title>Laragon Project Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .folder-button {
+                @apply w-48 h-48 m-2 bg-gray-50 border border-gray-200 rounded-xl 
+                       hover:bg-gray-100 transition-all duration-200 ease-in-out
+                       flex items-center justify-center text-gray-700 cursor-pointer;
+            }
+            .modal-content {
+                @apply bg-white rounded-lg shadow-xl p-6 w-96 mx-auto mt-32;
+            }
+            .input-field {
+                @apply w-full px-4 py-2 rounded-full border border-gray-300 
+                       focus:outline-none focus:ring-2 focus:ring-blue-400;
+            }
+            .button {
+                @apply px-6 py-2 bg-blue-500 text-white rounded-full
+                       hover:bg-blue-600 transition-colors duration-200;
+            }
         }
     </style>
-
-
 </head>
 
-<body>
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Arama yapın">
-    </div>
-    <div class="folder-button-container">
-        <?php
-        $klasorler = array_filter(glob('*', GLOB_ONLYDIR), 'is_dir');
-        foreach ($klasorler as $klasor) {
-            echo "<button class='folder-button' onclick=\"location.href='./$klasor'\">$klasor</button>";
-        }
-        ?>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        <!-- Search Bar -->
+        <div class="my-8">
+            <input type="text" 
+                   id="searchInput" 
+                   class="input-field mx-auto block"
+                   placeholder="Search projects...">
+        </div>
 
-        <button id="myBtn" class="folder-button">Klasör Oluştur</button>
-        <button id="kyBtn" class="folder-button">Klasör Yok Et</button>
-
-    </div>
-    <div id="klasorOlusturModal" class="modal">
-        <!-- Modal content -->
-        <div class="ko-modal-ıcerik">
-            <span class="close">&times;</span>
-            <form action="./" method="post">
-                <input type="text" id="klasorOlustur" class="mt-5" name="klasorOlustur" placeholder="Klasör İsmi Girin">
-                <button class="klasor-btn" type="submit">Klasör Oluştur</button>
-                <hr>
-                <div class="yanyana">
-                    <label for="phpOlsunMu"> PHP dosyası oluşturulsun mu?</label><br>
-                    <input type="checkbox" id="phpOlsunMu" name="phpOlsunMu" value="phpOlsunMu">
+        <!-- Folder Grid -->
+        <div class="flex flex-wrap justify-center gap-4 p-4">
+            <?php
+            $klasorler = array_filter(glob('*', GLOB_ONLYDIR), 'is_dir');
+            foreach ($klasorler as $klasor) {
+                echo "<a href='http://{$klasor}.test' class='folder-button'>
+                        <div>
+                            <svg class='w-12 h-12 mb-2 mx-auto' fill='currentColor' viewBox='0 0 20 20'>
+                                <path d='M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z'></path>
+                            </svg>
+                            <span>{$klasor}.test</span>
+                        </div>
+                    </a>";
+            }
+            ?>
+            <button id="myBtn" class="folder-button">
+                <div>
+                    <svg class="w-12 h-12 mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    <span>Create Project</span>
                 </div>
-            </form>
+            </button>
         </div>
     </div>
-    <div id="klasorYokEtModal" class="modal">
-        <!-- Modal content -->
-        <div class="ky-modal-ıcerik">
-            <span class="kyclose pb-5">&times;</span>
+
+    <!-- Create Project Modal -->
+    <div id="klasorOlusturModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Create New Project</h3>
+                <button class="close text-gray-500 hover:text-gray-700">&times;</button>
+            </div>
             <form action="./" method="post">
-                <input type="text" class="mt-5" id="klasorYokEt" name="klasorYokEt" placeholder="Klasör İsmi Girin">
-                <button class="klasor-btn " type="submit">Klasör Yok Et</button>
+                <input type="text" 
+                       name="klasorOlustur" 
+                       class="input-field mb-4"
+                       placeholder="Project Name">
+                <div class="flex items-center gap-2 mb-4">
+                    <input type="checkbox" 
+                           id="phpOlsunMu" 
+                           name="phpOlsunMu"
+                           class="rounded text-blue-500">
+                    <label>Include PHP file?</label>
+                </div>
+                <button type="submit" class="button w-full">Create Project</button>
             </form>
         </div>
     </div>
 
-
-
-    <!-- klasör oluşturma script kodları burada -->
-    <script>
-        // Get the modal
-        var modal = document.getElementById("klasorOlusturModal");
-
-        // Get the button that opens the modal
-        var btn = document.getElementById("myBtn");
-
-        // Get the <span> element that closes the modal
-        var span = document.getElementsByClassName("close")[0];
-
-        // When the user clicks on the button, open the modal
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-
-        // When the user clicks on <span> (x), close the modal
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-
-        // klasör yok etme script kodları burada
-        var kyModal = document.getElementById("klasorYokEtModal");
-
-        // Get the button that opens the modal
-        var kybtn = document.getElementById("kyBtn");
-
-        // Get the <span> element that closes the modal
-        var kyspan = document.getElementsByClassName("kyclose")[0];
-
-        // When the user clicks on the button, open the modal
-        kybtn.onclick = function() {
-            kyModal.style.display = "block";
-        }
-
-        // When the user clicks on <span> (x), close the modal
-        kyspan.onclick = function() {
-            kyModal.style.display = "none";
-        }
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-            if (event.target == kyModal) {
-                kyModal.style.display = "none";
-            }
-        }
-    </script>
-
-
-
-
-
-
+    <footer class="fixed bottom-0 w-full py-4 bg-white border-t">
+        <div class="container mx-auto text-center text-gray-600">
+            <p>Laragon Project Manager v3.0</p>
+            <p>Created by: <a href="https://github.com/hamer1818" class="text-blue-500 hover:text-blue-700">Hamza ORTATEPE</a></p>
+        </div>
+    </footer>
 
     <script>
-        var searchInput = document.getElementById("searchInput");
-        searchInput.addEventListener("input", function() {
-            var filter = searchInput.value.toUpperCase();
-            var folders = document.getElementsByClassName("folder-button");
-            for (var i = 0; i < folders.length; i++) {
-                var folder = folders[i];
-                var folderName = folder.innerHTML.toUpperCase();
-                if (folderName.indexOf(filter) > -1) {
-                    folder.style.display = "";
-                } else {
-                    folder.style.display = "none";
-                }
-            }
+        // Modal Logic
+        const modal = document.getElementById("klasorOlusturModal");
+        const btn = document.getElementById("myBtn");
+        const closeBtn = document.querySelector(".close");
+
+        btn.onclick = () => modal.classList.remove("hidden");
+        closeBtn.onclick = () => modal.classList.add("hidden");
+        window.onclick = (e) => {
+            if (e.target == modal) modal.classList.add("hidden");
+        }
+
+        // Search Logic
+        document.getElementById("searchInput").addEventListener("input", function(e) {
+            const filter = e.target.value.toLowerCase();
+            document.querySelectorAll(".folder-button").forEach(folder => {
+                const text = folder.textContent.toLowerCase();
+                folder.style.display = text.includes(filter) ? "" : "none";
+            });
         });
     </script>
-
-    <footer>
-        <p>php klasör bulucu v2.5 / php directory finder v2.5</p>
-        <p>Yapımcı: <a href="https://github.com/hamer1818">Hamza ORTATEPE</a></p>
-    </footer>
 </body>
-
 </html>
